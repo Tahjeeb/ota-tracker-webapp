@@ -1,8 +1,8 @@
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from bs4 import BeautifulSoup
-import requests, re, json, os
+import requests, re, json, os, csv, io
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -92,6 +92,22 @@ async def get_history():
             data = json.load(f)
             history.append({"file": file.name, "timestamp": data.get("timestamp"), "data": data.get("data")})
     return JSONResponse(history)
+
+@app.get("/api/download-csv")
+async def download_csv():
+    try:
+        with open("ota_updates.json") as f:
+            result = json.load(f)
+        csv_data = io.StringIO()
+        writer = csv.writer(csv_data)
+        writer.writerow(["Website", "Line", "Matches"])
+        for site, items in result["data"].items():
+            for entry in items:
+                writer.writerow([site, entry["line"], ", ".join(entry["matches"])])
+        csv_data.seek(0)
+        return StreamingResponse(csv_data, media_type="text/csv", headers={"Content-Disposition": "attachment; filename=ota_updates.csv"})
+    except FileNotFoundError:
+        return JSONResponse({"error": "No data to download."}, status_code=404)
 
 if __name__ == "__main__":
     import uvicorn

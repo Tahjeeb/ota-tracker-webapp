@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OTA Tracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      background: #f9f9f9;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 2rem;
+    }
+    th, td {
+      padding: 0.75rem;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+    th {
+      background: #eee;
+    }
+    button {
+      padding: 0.6rem 1.2rem;
+      background: #0073aa;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #005d8c;
+    }
+  </style>
+</head>
+<body>
+  <h1>OTA Update Tracker</h1>
+  <button onclick="fetchData()">🔄 Refresh Data</button>
+  <table id="otaTable">
+    <thead>
+      <tr>
+        <th>Website</th>
+        <th>Update Info</th>
+        <th>Matched Keywords</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    async function fetchData() {
+      const res = await fetch('/api/scrape');
+      const data = await res.json();
+
+      const tbody = document.querySelector("#otaTable tbody");
+      tbody.innerHTML = "";
+
+      for (const site in data.data) {
+        data.data[site].forEach(entry => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${site}</td>
+            <td>${entry.line}</td>
+            <td>${entry.matches.join(", ")}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      }
+    }
+
+    window.onload = fetchData;
+  </script>
+</body>
+</html>

@@ -1,77 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>OTA Tracker</title>
+  <meta charset="UTF-8">
+  <title>OTA Tracker WebApp</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 2rem;
-      background: #f9f9f9;
+      background: #f4f4f4;
     }
     h1 {
-      text-align: center;
       color: #333;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 2rem;
-    }
-    th, td {
-      padding: 0.75rem;
-      border: 1px solid #ccc;
-      text-align: left;
-    }
-    th {
-      background: #eee;
-    }
     button {
-      padding: 0.6rem 1.2rem;
-      background: #0073aa;
+      margin: 1rem 0;
+      padding: 0.6rem 1rem;
+      background-color: #007acc;
       color: white;
       border: none;
+      border-radius: 5px;
       cursor: pointer;
     }
     button:hover {
-      background: #005d8c;
+      background-color: #005fa3;
+    }
+    .timestamp {
+      font-size: 0.9rem;
+      color: #666;
+    }
+    .result {
+      background: white;
+      padding: 1rem;
+      margin-top: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .site {
+      margin-bottom: 1rem;
+    }
+    .line {
+      font-size: 0.9rem;
+      margin-left: 1rem;
     }
   </style>
 </head>
 <body>
-  <h1>OTA Update Tracker</h1>
-  <button onclick="fetchData()">🔄 Refresh Data</button>
-  <table id="otaTable">
-    <thead>
-      <tr>
-        <th>Website</th>
-        <th>Update Info</th>
-        <th>Matched Keywords</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <h1>OTA Tracker</h1>
+  <div class="timestamp" id="timestamp">Last Updated: —</div>
+  <button onclick="fetchData()">Refresh Data</button>
+  <button onclick="downloadCSV()">Download CSV</button>
+  <div id="results" class="result"></div>
 
   <script>
     async function fetchData() {
-      const res = await fetch('/api/scrape');
+      const res = await fetch("/api/ota-data");
       const data = await res.json();
 
-      const tbody = document.querySelector("#otaTable tbody");
-      tbody.innerHTML = "";
+      document.getElementById("timestamp").innerText = "Last Updated: " + new Date(data.timestamp).toLocaleString();
+
+      const resultsDiv = document.getElementById("results");
+      resultsDiv.innerHTML = "";
 
       for (const site in data.data) {
+        const section = document.createElement("div");
+        section.classList.add("site");
+        section.innerHTML = `<strong>${site}</strong>`;
         data.data[site].forEach(entry => {
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td>${site}</td>
-            <td>${entry.line}</td>
-            <td>${entry.matches.join(", ")}</td>
-          `;
-          tbody.appendChild(row);
+          const p = document.createElement("div");
+          p.className = "line";
+          p.textContent = `→ ${entry.line}`;
+          section.appendChild(p);
         });
+        resultsDiv.appendChild(section);
       }
+    }
+
+    async function downloadCSV() {
+      window.location.href = "/api/download-csv";
     }
 
     window.onload = fetchData;

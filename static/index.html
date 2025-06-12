@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>OTA Tracker WebApp</title>
+  <meta charset="UTF-8" />
+  <title>OTA Tracker</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -13,8 +13,8 @@
       color: #333;
     }
     button {
-      margin: 1rem 0;
-      padding: 0.6rem 1rem;
+      margin: 0.5rem 0.5rem 1rem 0;
+      padding: 0.6rem 1.2rem;
       background-color: #007acc;
       color: white;
       border: none;
@@ -25,18 +25,18 @@
       background-color: #005fa3;
     }
     .timestamp {
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       color: #666;
+      margin-bottom: 1rem;
     }
     .result {
       background: white;
       padding: 1rem;
-      margin-top: 1rem;
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     .site {
-      margin-bottom: 1rem;
+      margin-bottom: 1.5rem;
     }
     .line {
       font-size: 0.9rem;
@@ -53,6 +53,10 @@
 
   <script>
     async function fetchData() {
+      // Trigger live scraping first
+      await fetch("/api/scrape");
+
+      // Then load the latest OTA data
       const res = await fetch("/api/ota-data");
       const data = await res.json();
 
@@ -75,7 +79,7 @@
       }
     }
 
-    async function downloadCSV() {
+    function downloadCSV() {
       window.location.href = "/api/download-csv";
     }
 

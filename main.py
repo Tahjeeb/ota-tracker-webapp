@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from bs4 import BeautifulSoup
-import requests, re, json
+import requests, re, json, os
 from datetime import datetime
 from pathlib import Path
 
@@ -17,7 +17,7 @@ WEBSITES = [
 KEYWORDS = ['OTA', 'Over-the-Air', 'software update', 'firmware', 'version']
 
 def extract_ota_info(text):
-    pattern = r"(OTA|over[- ]the[- ]air|software update|firmware)\s.*?\d{4}|\d+\.\d+"
+    pattern = r"(OTA|over[- ]the[- ]air|software update|firmware)\\s.*?\\d{4}|\\d+\\.\\d+"
     matches = re.findall(pattern, text, re.IGNORECASE)
     return list(set(matches))
 
@@ -63,3 +63,8 @@ async def get_saved_data():
             return JSONResponse(json.load(f))
     except FileNotFoundError:
         return JSONResponse({"error": "No data found."}, status_code=404)
+
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 10000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
